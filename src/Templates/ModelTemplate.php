@@ -4,10 +4,35 @@ namespace Blankkids\WebmanBuild\Templates;
 
 use Doctrine\Inflector\InflectorFactory;
 use support\Db;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Webman\Console\Util;
 
 class ModelTemplate
 {
+    /**
+     * @param $name
+     * @param $module_name
+     * @return array
+     */
+    public static function getConfig($name, $module_name)
+    {
+        $class = $name;
+        $suffix = config('plugin.blankkids.webman-build.app.file_name_format.model', '');
+        if ($suffix && !strpos($class, $suffix)) {
+            $class .= $suffix;
+        }
+        $class = str_replace('\\', '/', $class);
+        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'model';
+        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR . $class . '.php';
+
+        return [
+            'class' => $class,
+            'namespace' => $namespace,
+            'file' => $file,
+        ];
+    }
+
     /**
      * @param $class
      * @param $namespace
@@ -15,8 +40,18 @@ class ModelTemplate
      * @param string|null $connection
      * @return void
      */
-    public static function create($class, $tableName, $namespace, $file, $connection = null)
+    public static function create($name, $module_name, $connection = null)
     {
+        $config = self::getConfig($name, $module_name);
+        $class = $config['class'];
+        $namespace = $config['namespace'];
+        $file = $config['file'];
+
+        if (is_file($file)) {
+            printf("%s 已经存在!跳过创建模型\n", $file);
+            return;
+        }
+
         $path = pathinfo($file, PATHINFO_DIRNAME);
         if (!is_dir($path)) {
             if (!mkdir($path, 0777, true) && !is_dir($path)) {
@@ -32,7 +67,7 @@ class ModelTemplate
             $prefix = config("database.connections.$connection.prefix") ?? '';
             $database = config("database.connections.$connection.database");
             $inflector = InflectorFactory::create()->build();
-            $table_plura = $inflector->tableize($tableName);
+            $table_plura = $inflector->tableize($name);
             $con = Db::connection($connection);
             if ($con->select("show tables like '{$prefix}{$table_plura}'")) {
                 $table_val = "'{$table_plura}'";

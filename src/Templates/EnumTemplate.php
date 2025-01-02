@@ -2,7 +2,7 @@
 
 namespace Blankkids\WebmanBuild\Templates;
 
-class ControllerTemplate
+class EnumTemplate
 {
     /**
      * @param $name
@@ -12,13 +12,13 @@ class ControllerTemplate
     public static function getConfig($name, $module_name)
     {
         $class = $name;
-        $suffix = config('plugin.blankkids.webman-build.app.file_name_format.controller', '');
+        $suffix = config('plugin.blankkids.webman-build.app.file_name_format.enum', '');
         if ($suffix && !strpos($class, $suffix)) {
             $class .= $suffix;
         }
         $class = str_replace('\\', '/', $class);
-        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'port' . DIRECTORY_SEPARATOR . 'controller';
-        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'port' . DIRECTORY_SEPARATOR . 'controller' . DIRECTORY_SEPARATOR . $class . '.php';
+        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name  . DIRECTORY_SEPARATOR . 'enum';
+        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name  . DIRECTORY_SEPARATOR . 'enum' . DIRECTORY_SEPARATOR . $class . '.php';
 
         return [
             'class' => $class,
@@ -41,6 +41,11 @@ class ControllerTemplate
 
         $path = pathinfo($file, PATHINFO_DIRNAME);
 
+        if (is_file($file)) {
+            printf("%s 已经存在!跳过创建枚举\n", $file);
+            return;
+        }
+
         if (!is_dir($path)) {
             if (!mkdir($path, 0777, true) && !is_dir($path)) {
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $path));
@@ -51,14 +56,15 @@ class ControllerTemplate
 
 namespace $namespace;
 
-use support\Request;
-
+/**
+ * notes: 数据单元常量
+ * desc: 状态层 - 业务中用到的常量,统一放这里, 一个数据单元 对应 一个常量类(一个表对应一个枚举类对应一个映射‌枚举)
+ */
 class $class
 {
-    public function index(Request \$request)
-    {
-        return response(__CLASS__);
-    }
+    /** @var int 禁用状态: 1-开启，2-关闭 */
+    const DISABLE_STATUS = 1;
+    const ENABLE_STATUS  = 2;
 
 }
 

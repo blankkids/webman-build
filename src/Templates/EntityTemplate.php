@@ -10,12 +10,40 @@ class EntityTemplate
 {
     /**
      * @param $name
-     * @param $namespace
-     * @param $file
+     * @param $module_name
+     * @return array
+     */
+    public static function getConfig($name, $module_name)
+    {
+        $class = $name;
+        $suffix = config('plugin.blankkids.webman-build.app.file_name_format.entity', '');
+        if ($suffix && !strpos($class, $suffix)) {
+            $class .= $suffix;
+        }
+        $class = str_replace('\\', '/', $class);
+        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'entity';
+        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . $class . '.php';
+
+        return [
+            'class' => $class,
+            'namespace' => $namespace,
+            'file' => $file,
+        ];
+    }
+
+    /**
+     * @param $name
+     * @param $module_name
+     * @param $connection
      * @return void
      */
-    public static function create($class, $tableName, $namespace, $file, $connection = null)
+    public static function create($name, $module_name, $connection = null)
     {
+        $config = self::getConfig($name, $module_name);
+        $class = $config['class'];
+        $namespace = $config['namespace'];
+        $file = $config['file'];
+
         $path = pathinfo($file, PATHINFO_DIRNAME);
 
         if (!is_dir($path)) {
@@ -24,7 +52,7 @@ class EntityTemplate
             }
         }
 
-        $table = Util::classToName($tableName);
+        $table = Util::classToName($class);
         $pk = 'id';
         $fieldItem = '';
         $properties = '';
@@ -33,7 +61,7 @@ class EntityTemplate
             $prefix = config("database.connections.$connection.prefix") ?? '';
             $database = config("database.connections.$connection.database");
             $inflector = InflectorFactory::create()->build();
-            $table_plura = $inflector->tableize($tableName);
+            $table_plura = $inflector->tableize($name);
             $con = Db::connection($connection);
             if ($con->select("show tables like '{$prefix}{$table_plura}'")) {
                 $table = "{$prefix}{$table_plura}";
@@ -79,7 +107,10 @@ class EntityTemplate
 
 namespace $namespace;
 
-
+/**
+ * notes：数据库字段映射类 （实体类）
+ * desc: $comments （有修改可以用命令重新生成，切勿手动修改）
+ */
 class $class
 {
     $fieldItem

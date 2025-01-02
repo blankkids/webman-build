@@ -5,6 +5,9 @@ namespace Blankkids\WebmanBuild\Commands;
 use Blankkids\WebmanBuild\Base;
 use Blankkids\WebmanBuild\Templates\ControllerTemplate;
 use Blankkids\WebmanBuild\Templates\EntityTemplate;
+use Blankkids\WebmanBuild\Templates\EnumTemplate;
+use Blankkids\WebmanBuild\Templates\ErrorTemplate;
+use Blankkids\WebmanBuild\Templates\MapTemplate;
 use Blankkids\WebmanBuild\Templates\ModelTemplate;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -43,40 +46,22 @@ class MakeModuleOnlineCommand extends Base
         $this->makeFolderByArr($module_name, $output);
 
         //创建模型
-        $model_name = $name;
-        $suffix = config('plugin.blankkids.webman-build.app.file_name_format.model', '');
-        if ($suffix && !strpos($model_name, $suffix)) {
-            $model_name .= $suffix;
-        }
-        $model_name = str_replace('\\', '/', $model_name);
-        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'model';
-        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR . $model_name . '.php';
-
-        ModelTemplate::create($model_name, $name, $namespace, $file);
+        ModelTemplate::create($name, $module_name);
 
         //创建模型实体
-        $model_name = $name;
-        $suffix = config('plugin.blankkids.webman-build.app.file_name_format.entity', '');
-        if ($suffix && !strpos($model_name, $suffix)) {
-            $model_name .= $suffix;
-        }
-        $model_name = str_replace('\\', '/', $model_name);
-        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'entity';
-        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . $model_name . '.php';
+        EntityTemplate::create($name, $module_name);
 
-        EntityTemplate::create($model_name, $name, $namespace, $file);
+        //创建模型枚举
+        EnumTemplate::create($name, $module_name);
+
+        //创建映射‌枚举
+        MapTemplate::create($name, $module_name);
+
+        //创建错误码
+        ErrorTemplate::create($name, $module_name);
 
         //创建控制器
-        $controller_name = $name;
-        $suffix = config('plugin.blankkids.webman-build.app.file_name_format.controller', '');
-        if ($suffix && !strpos($controller_name, $suffix)) {
-            $controller_name .= $suffix;
-        }
-        $controller_name = str_replace('\\', '/', $controller_name);
-        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'port' . DIRECTORY_SEPARATOR . 'controller';
-        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'port' . DIRECTORY_SEPARATOR . 'controller' . DIRECTORY_SEPARATOR . $controller_name . '.php';
-
-        ControllerTemplate::create($controller_name, $namespace, $file);
+        ControllerTemplate::create($name, $module_name);
 
         return self::SUCCESS;
     }

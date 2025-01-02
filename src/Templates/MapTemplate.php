@@ -2,7 +2,7 @@
 
 namespace Blankkids\WebmanBuild\Templates;
 
-class ControllerTemplate
+class MapTemplate
 {
     /**
      * @param $name
@@ -12,13 +12,13 @@ class ControllerTemplate
     public static function getConfig($name, $module_name)
     {
         $class = $name;
-        $suffix = config('plugin.blankkids.webman-build.app.file_name_format.controller', '');
+        $suffix = config('plugin.blankkids.webman-build.app.file_name_format.map', '');
         if ($suffix && !strpos($class, $suffix)) {
             $class .= $suffix;
         }
         $class = str_replace('\\', '/', $class);
-        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'port' . DIRECTORY_SEPARATOR . 'controller';
-        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'port' . DIRECTORY_SEPARATOR . 'controller' . DIRECTORY_SEPARATOR . $class . '.php';
+        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'map';
+        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'map' . DIRECTORY_SEPARATOR . $class . '.php';
 
         return [
             'class' => $class,
@@ -41,6 +41,16 @@ class ControllerTemplate
 
         $path = pathinfo($file, PATHINFO_DIRNAME);
 
+        if (is_file($file)) {
+            printf("%s 已经存在!跳过创建映射‌枚举\n", $file);
+            return;
+        }
+
+        $enum_config = EnumTemplate::getConfig($name, $module_name);
+        $enum_class = $enum_config['class'];
+        $enum_namespace = $enum_config['namespace'];
+
+        $use_enum = $enum_namespace . DIRECTORY_SEPARATOR . $enum_class;
         if (!is_dir($path)) {
             if (!mkdir($path, 0777, true) && !is_dir($path)) {
                 throw new \RuntimeException(sprintf('Directory "%s" was not created', $path));
@@ -51,15 +61,22 @@ class ControllerTemplate
 
 namespace $namespace;
 
-use support\Request;
+use $use_enum;
 
+/**
+ * notes: 映射‌枚举
+ * desc: 转化枚举值(一个表对应一个枚举类对应一个映射‌枚举)
+ */
 class $class
 {
-    public function index(Request \$request)
+    /** @return mixed 禁用状态: 1-开启，2-关闭 */
+    public static function getStatusMap()
     {
-        return response(__CLASS__);
+        return [
+            $enum_class::DISABLE_STATUS => '禁用',
+            $enum_class::ENABLE_STATUS => '启用',
+        ];
     }
-
 }
 
 EOF;
