@@ -19,12 +19,13 @@ class ModelTemplate
     {
         $class = $name;
         $suffix = config('plugin.blankkids.webman-build.app.file_name_format.model', '');
+        $file_path = config('plugin.blankkids.webman-build.app.child_path.model', '');
         if ($suffix && !strpos($class, $suffix)) {
             $class .= $suffix;
         }
         $class = str_replace('\\', '/', $class);
-        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'model';
-        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR . $class . '.php';
+        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . $file_path;
+        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . $file_path . DIRECTORY_SEPARATOR . $class . '.php';
 
         return [
             'class' => $class,

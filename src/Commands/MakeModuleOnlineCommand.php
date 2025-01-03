@@ -7,6 +7,7 @@ use Blankkids\WebmanBuild\Templates\ControllerTemplate;
 use Blankkids\WebmanBuild\Templates\EntityTemplate;
 use Blankkids\WebmanBuild\Templates\EnumTemplate;
 use Blankkids\WebmanBuild\Templates\ErrorTemplate;
+use Blankkids\WebmanBuild\Templates\LogicTemplate;
 use Blankkids\WebmanBuild\Templates\MapTemplate;
 use Blankkids\WebmanBuild\Templates\ModelTemplate;
 use Symfony\Component\Console\Input\InputArgument;
@@ -60,8 +61,11 @@ class MakeModuleOnlineCommand extends Base
         //创建错误码
         ErrorTemplate::create($name, $module_name);
 
+        //创建业务类
+        LogicTemplate::create($name, $module_name, $curd_name);
+
         //创建控制器
-        ControllerTemplate::create($name, $module_name);
+        ControllerTemplate::create($name, $module_name, $curd_name);
 
         return self::SUCCESS;
     }

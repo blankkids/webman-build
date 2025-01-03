@@ -13,12 +13,13 @@ class ErrorTemplate
     {
         $class = $name;
         $suffix = config('plugin.blankkids.webman-build.app.file_name_format.error', '');
+        $file_path = config('plugin.blankkids.webman-build.app.child_path.error', '');
         if ($suffix && !strpos($class, $suffix)) {
             $class .= $suffix;
         }
         $class = str_replace('\\', '/', $class);
-        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name  . DIRECTORY_SEPARATOR . 'error';
-        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name  . DIRECTORY_SEPARATOR . 'error' . DIRECTORY_SEPARATOR . $class . '.php';
+        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . $file_path;
+        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . $file_path . DIRECTORY_SEPARATOR . $class . '.php';
 
         return [
             'class' => $class,
@@ -74,12 +75,12 @@ class $class
         
     ];
 
-    static function code(\$type)
+    public static function code(\$type)
     {
         return self::\$data[\$type]['code'];
     }
 
-    static function msg(\$type)
+    public static function msg(\$type)
     {
         return self::\$data[\$type]['msg'];
     }

@@ -13,12 +13,13 @@ class EnumTemplate
     {
         $class = $name;
         $suffix = config('plugin.blankkids.webman-build.app.file_name_format.enum', '');
+        $file_path = config('plugin.blankkids.webman-build.app.child_path.enum', '');
         if ($suffix && !strpos($class, $suffix)) {
             $class .= $suffix;
         }
         $class = str_replace('\\', '/', $class);
-        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name  . DIRECTORY_SEPARATOR . 'enum';
-        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name  . DIRECTORY_SEPARATOR . 'enum' . DIRECTORY_SEPARATOR . $class . '.php';
+        $namespace = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . $file_path;
+        $file = config('plugin.blankkids.webman-build.app.domain_path', 'app') . DIRECTORY_SEPARATOR . $module_name . DIRECTORY_SEPARATOR . $file_path . DIRECTORY_SEPARATOR . $class . '.php';
 
         return [
             'class' => $class,

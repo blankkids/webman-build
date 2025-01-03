@@ -2,7 +2,7 @@
 
 namespace Blankkids\WebmanBuild\Templates;
 
-class ControllerTemplate
+class LogicTemplate
 {
     /**
      * @param $name
@@ -12,8 +12,8 @@ class ControllerTemplate
     public static function getConfig($name, $module_name)
     {
         $class = $name;
-        $suffix = config('plugin.blankkids.webman-build.app.file_name_format.controller', '');
-        $file_path = config('plugin.blankkids.webman-build.app.child_path.controller', '');
+        $suffix = config('plugin.blankkids.webman-build.app.file_name_format.logic', '');
+        $file_path = config('plugin.blankkids.webman-build.app.child_path.logic', '');
         if ($suffix && !strpos($class, $suffix)) {
             $class .= $suffix;
         }
@@ -33,7 +33,7 @@ class ControllerTemplate
      * @param $module_name
      * @return void
      */
-    public static function create($name, $module_name)
+    public static function create($name, $module_name, $curd_name)
     {
         $config = self::getConfig($name, $module_name);
         $class = $config['class'];
@@ -42,17 +42,17 @@ class ControllerTemplate
 
         $path = pathinfo($file, PATHINFO_DIRNAME);
 
-        if (!is_dir($path)) {
-            if (!mkdir($path, 0777, true) && !is_dir($path)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $path));
+        if (!is_file($file)) {
+            if (!is_dir($path)) {
+                if (!mkdir($path, 0777, true) && !is_dir($path)) {
+                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $path));
+                }
             }
-        }
-        $controller_content = <<<EOF
+
+            $controller_content = <<<EOF
 <?php
 
 namespace $namespace;
-
-use support\Request;
 
 class $class
 {
@@ -79,12 +79,31 @@ class $class
 
 //{@block_d}
 //{@block_d/}
-
 }
 
 EOF;
-        file_put_contents($file, $controller_content);
+            file_put_contents($file, $controller_content);
+
+        }
+
+        $update_file = file_get_contents($file);
+        $make_fun = explode(',', $curd_name);
+        foreach ($make_fun as $value) {
+            $controller_content = "public function {$value}() {\n\t\treturn true;\n\t}\n";
+            self::changeForCodeBlockTag($value, $update_file, $controller_content);
+        }
+
     }
 
 
+    public static function changeForCodeBlockTag($code_block, &$content, &$changeContent)
+    {
+        preg_match('/\/\/{@block_c}(.*)\/\/{@block_c\//', $content, $m);
+        if (isset($m[1])) {
+            //清除掉 "模板" 注释
+            $m[1] = preg_replace("/模板/i", '', $m[1]);
+            //#
+            $changeContent = preg_replace("/(\\/\\/{@block_" . $code_block . "}).*(\\/\\/{@block_" . $code_block . "\\/})/", "$1" . $m[1] . "$2", $changeContent);
+        }
+    }
 }
